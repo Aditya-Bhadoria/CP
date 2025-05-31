@@ -1,0 +1,16 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/Adity/Downloads/CP/Chef/180D_A'
+relocations:
+  - { offset: 0x16544, size: 0x8, addend: 0x0, symName: __ZStL8__ioinit, symObjAddr: 0x62568, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0x16853, size: 0x8, addend: 0x0, symName: __ZNSt3tr112_GLOBAL__N_1L6ignoreE, symObjAddr: 0x62569, symBinAddr: 0x100008001, symSize: 0x0 }
+  - { offset: 0x1688A, size: 0x8, addend: 0x0, symName: __ZL3mod, symObjAddr: 0x2B8, symBinAddr: 0x100000B58, symSize: 0x0 }
+  - { offset: 0x168A0, size: 0x8, addend: 0x0, symName: __ZL4mod2, symObjAddr: 0x2C0, symBinAddr: 0x100000B60, symSize: 0x0 }
+  - { offset: 0x169D4, size: 0x8, addend: 0x0, symName: __GLOBAL__sub_I_180D_A.cpp, symObjAddr: 0x420, symBinAddr: 0x100000860, symSize: 0x14 }
+  - { offset: 0x169EB, size: 0x8, addend: 0x0, symName: __Z41__static_initialization_and_destruction_0v, symObjAddr: 0x3E0, symBinAddr: 0x100000820, symSize: 0x40 }
+  - { offset: 0x16A09, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x340, symBinAddr: 0x100000880, symSize: 0x98 }
+  - { offset: 0x16A3B, size: 0x8, addend: 0x0, symName: __Z3powxxx, symObjAddr: 0x84, symBinAddr: 0x1000007C4, symSize: 0x40 }
+  - { offset: 0x16A9C, size: 0x8, addend: 0x0, symName: __Z3powxx, symObjAddr: 0x4C, symBinAddr: 0x10000078C, symSize: 0x38 }
+  - { offset: 0x16AEF, size: 0x8, addend: 0x0, symName: __Z3lcmxx, symObjAddr: 0x30, symBinAddr: 0x100000770, symSize: 0x1C }
+  - { offset: 0x16B32, size: 0x8, addend: 0x0, symName: __Z3gcdxx, symObjAddr: 0x0, symBinAddr: 0x100000740, symSize: 0x30 }
+...
