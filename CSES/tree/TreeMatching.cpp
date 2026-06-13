@@ -4,23 +4,28 @@ using ll=long long;
 #define vint vector<int>
 #define vll vector<ll>
 
-void dfs(int node, int par, vint g[], vint &size){
+void dfs(int node, int par, vint g[], vint &vis, int &ans){
     for(auto it : g[node]){
-        dfs(it, node, g, size);
-        size[node] += (1 + size[it]);
+        if(it == par) continue;
+        dfs(it, node, g, vis, ans);
+        if(!vis[it] && !vis[node]){
+            vis[it] = 1; vis[node] = 1;
+            ans++;
+        }
     }
 }
 
 void solve(){
     int n; cin >> n;
-    vint g[n+1], size(n+1, 0);
-    for(int i=2; i<=n; i++){
-        int x; cin >> x;
-        g[x].push_back(i);
+    vint g[n+1], vis(n+1, 0);
+    int ans = 0;
+    for(int i=0; i<n-1; i++){
+        int u,v; cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
     }
-    dfs(1, -1, g, size);
-    for(int i=1; i<=n; i++) cout << size[i] << " ";
-    cout << endl;
+    dfs(1, -1, g, vis, ans);
+    cout << ans << endl;
 }
 
 int main(){
