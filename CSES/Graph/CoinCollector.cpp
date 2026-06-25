@@ -1,182 +1,95 @@
-#pragma GCC optimize("Ofast")
-#pragma GCC optimize("unroll-loops")
- 
 #include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
- 
 using namespace std;
- 
-using namespace __gnu_pbds;
-using ll = long long;
-using ull=unsigned long long;
- 
+using ll=long long;
 #define vint vector<int>
 #define vll vector<ll>
-#define vull vector<ull>
-#define pii pair<int,int>
-#define pb push_back
-#define out(v) for(auto &i: v) cout<<i<<" ";cout << endl;
-#define in(v) for(auto &i: v) cin>>i;
-#define inn(v,n) for(int i=0;i<n;i++) cin>>v[i];
-#define all(v) v.begin(),v.end()
-#define rall(v) v.rbegin(),v.rend()
- 
-const ll mod = 1e9 + 7;
-const ll mod2 = 998244353;
-typedef tree<int, null_type,less<>, rb_tree_tag,tree_order_statistics_node_update> ordered_set;
-typedef tree<int, null_type, less_equal<int>, rb_tree_tag,tree_order_statistics_node_update> ordered_multiset;
-//p.find_by_order - value at given index
-//p.order_of_key - index of given key
- 
-ll gcd(ll a, ll b) { return b ? gcd(b, a%b) : a; }
-ll lcm(ll a, ll b) { return a*b/gcd(a,b); }
- 
-ll pow(ll a, ll b) {
-    ll ans = 1;
-    while (b) {
-        if (b & 1) ans *= a;
-        b >>= 1;
-        a *= a;
+
+int n, m;
+vector<ll> coins;
+vector<vector<int>> g, gr, cond_g;
+vector<int> vis, order, comp;
+vector<ll> comp_coins, dp;
+
+// Topological Sort order
+void dfs1(int u) {
+    vis[u] = 1;
+    for (int v : g[u]) {
+        if (!vis[v]) dfs1(v);
     }
-    return ans;
-}
- 
-ll pow(ll a, ll b, ll c) {
-    ll ans = 1;
-    while (b) {
-        if (b & 1) ans = (ans * a) % c;
-        b >>= 1;
-        a = (a * a) % c;
-    }
-    return ans;
-}
- 
-ll factorial(ll x){
-    if(x == 1 || x == 0){
-        return 1;
-    }
-    ll ans = 1;
-    for(int i=2; i<=x; i++){
-        ans = (ans%mod)*(i%mod);
-        ans %= mod;
-    }
-    return ans;
-}
- 
-class DSU {
-    vector<int> parent, size, rank;
-public:
-    // Constructor: initialize DSU for n elements (1-based indexing)
-    DSU(int n) {
-        parent.resize(n + 1);
-        size.resize(n + 1, 1);
-        rank.resize(n + 1, 0);
-        for (int i = 0; i <= n; i++) parent[i] = i;
-    }
-    // Optional: create a new set containing only v
-    void make(int v) {
-        parent[v] = v;
-        size[v] = 1;
-    }
-    // Find the representative with path compression
-    int find(int v) {
-        if (v == parent[v]) return v;
-        return parent[v] = find(parent[v]);
-    }
-    // Union two sets by size
-    void unite(int a, int b) {
-        a = find(a);
-        b = find(b);
-        if (a != b) {
-            if (size[a] < size[b]) swap(a, b);
-            parent[b] = a;
-            size[a] += size[b];
-        }
-    }
-    // Union two sets by rank
-    void uniteByRank(int a, int b) {
-        a = find(a);
-        b = find(b);
-        if (a != b) {
-            if (rank[a] < rank[b]) parent[a] = b;
-            else if (rank[b] < rank[a]) parent[b] = a;
-            else{
-                parent[b] = a;
-                rank[a]++;
-            }
-        }
-    }
-    // Get size of the set containing v
-    int get_size(int v) {
-        return size[find(v)];
-    }
-    // Get rank of the set containing v
-    int get_rank(int v){
-        return rank[find(v)];
-    }
-};
- 
-void dfs1_scc(int node, vector<int>&vis, vector<vector<int>>&adj, stack<int>&st){
-    vis[node] = 1;
-    for(auto child : adj[node]){
-        if(!vis[child]) dfs1_scc(child, vis, adj, st);
-    }
-    st.push(node);
+    order.push_back(u);
 }
 
-void dfs2_scc(int node, vint &vis, vint adjT[], vint &ans, int scc){
-    vis[node] = 1;
-    ans[node] = scc;
-    for(auto child : adjT[node]){
-        if(!vis[child]) dfs2_scc(child, vis, adjT, ans, scc);
-        // ans[child] = scc;
-    }
+// extract components
+void dfs2(int u, int c) {
+    vis[u] = 1;
+    comp[u] = c;
+    comp_coins[c] += coins[u]; // Accumulate coins inside this mega-node
+    for(int v : gr[u]) if(!vis[v]) dfs2(v, c);
 }
-vll ans(1e5, 0);
-void solve() {
-    int n, m; cin >> n >> m; 
-    vll arr(n), indeg(n, 0); in(arr);
-    vll g[n];
-    ll coins = 0;
-    for(int i=0; i<m; i++){
-        ll a, b; cin >> a >> b;
-        a--; b--;
-        g[b].push_back(a);
-        indeg[a]++;
+
+// calculate max
+ll coin(int u) {
+    if(dp[u] != -1) return dp[u];
+    ll max_next = 0;
+    for(int v : cond_g[u]){
+        max_next = max(max_next, coin(v));
     }
-    queue<int> q; 
-    for(int i=0; i<n; i++) if(indeg[i] == 0) q.push(i);
-    while(!q.empty()){
-        int node = q.front();
-        q.pop();
-        vint vis(n, 0);
-        queue<int> q2;
-        q2.push(node);
-        while(!q2.empty()){
-            int node2 = q2.front();
-            q2.pop();
-            vis[node2] = 1;
-            ans[node] += arr[node2];
-            for(auto it : g[node2]){
-                if(!vis[it]){
-                    q2.push(it);
-                }
+    return dp[u] = comp_coins[u] + max_next;
+}
+
+void solve() {
+    cin >> n >> m;
+    coins.resize(n);
+    g.resize(n);
+    gr.resize(n);
+    for(int i=0; i<n; i++) cin >> coins[i];
+    for(int i=0; i<m; i++){
+        int u, v; cin >> u >> v;
+        u--; v--;
+        g[u].push_back(v);
+        gr[v].push_back(u); // Reversed graph
+    }
+    // Run Pass 1
+    vis.assign(n, 0);
+    for(int i=0; i<n; i++) if(!vis[i]) dfs1(i);
+
+    // Run Pass 2
+    vis.assign(n, 0);
+    comp.resize(n);
+    comp_coins.assign(n, 0);
+    reverse(order.begin(), order.end());
+
+    int comp_cnt = 0;
+    for(int u : order){
+        if(!vis[u]){
+            dfs2(u, comp_cnt);
+            comp_cnt++;
+        }
+    }
+    // condensation DAG
+    cond_g.resize(comp_cnt);
+    for(int u=0; u<n; u++){
+        for(int v : g[u]){
+            if(comp[u] != comp[v]){
+                cond_g[comp[u]].push_back(comp[v]);
             }
         }
-        coins = max(coins, ans[node]);
     }
-    cout << coins << endl;
+    // Evaluate max paths globally across components
+    dp.assign(comp_cnt, -1);
+    ll ans = 0;
+    for(int i=0; i<comp_cnt; i++) ans = max(ans, coin(i));
+    cout << ans;
 }
- 
-int main() {
+
+int main(){
     #ifndef ONLINE_JUDGE
     freopen("/Users/Adity/Downloads/CP/input.txt", "r", stdin);
     freopen("/Users/Adity/Downloads/CP/output.txt", "w", stdout);
     #endif
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr); cout.tie(nullptr);
-    int t = 1; 
+    int t = 1;
     // cin >> t;
     while(t--){
         solve();
